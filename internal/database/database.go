@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/jackc/pgx/v5"
 	"log"
 	"os"
 	"strconv"
@@ -39,18 +40,12 @@ var (
 )
 
 func New() Service {
-	// Reuse Connection
-	if dbInstance != nil {
-		return dbInstance
-	}
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s", username, password, host, port, database, schema)
-	db, err := sql.Open("pgx", connStr)
+	conn, err := pgx.Connect(context.Background(), os.Getenv("CONN"))
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
 	}
-	dbInstance = &service{
-		db: db,
-	}
+	defer conn.Close(context.Background())
 	return dbInstance
 }
 

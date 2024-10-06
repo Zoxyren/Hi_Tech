@@ -14,3 +14,7 @@ type ProductService struct {
 func (s *ProductService) GetAllProducts() ([]model.Products, error) {
 	return s.Repo.FetchAll()
 }
+
+func (s *ProductService) GetProductById(id int) (*model.Products, error) {
+	return s.Repo.FetchProductById(id)
+}

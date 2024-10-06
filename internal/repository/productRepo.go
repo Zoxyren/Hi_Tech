@@ -28,3 +28,13 @@ func (r *ProductRepository) FetchAll() ([]model.Products, error) {
 
 	return products, nil
 }
+
+func (r *ProductRepository) FetchProductById(id int) (*model.Products, error) {
+	var product model.Products
+	row := r.Db.QueryRow("SELECT id, name, price FROM products WHERE id = ?", id)
+	err := row.Scan(&product.ProductID, &product.Name, &product.Price)
+	if err == sql.ErrNoRows {
+		return nil, err
+	}
+	return &product, err
+}

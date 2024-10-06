@@ -18,6 +18,8 @@ func NewError(status int, message string) *ErrorResponse {
 }
 
 var (
+	ErrItemWithIDNotFound   = NewError(http.StatusNotFound, "Item with given ID not found")
+	ErrItemsNotFound        = NewError(http.StatusNotFound, "Items not found")
 	ErrItemNotFound         = NewError(http.StatusNotFound, "item not found")
 	ErrInvalidCredentials   = NewError(http.StatusUnauthorized, "invalid credentials")
 	ErrInternalServer       = NewError(http.StatusInternalServerError, "internal server error")

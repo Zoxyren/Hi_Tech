@@ -2,9 +2,10 @@ package controller
 
 import (
 	"Hi_Tech/internal/model"
+	"Hi_Tech/internal/repository"
+	"Hi_Tech/internal/services"
 	"database/sql"
 	"encoding/json"
-	"log"
 	"net/http"
 )
 
@@ -13,33 +14,13 @@ type Product struct {
 	db       *sql.DB
 }
 
-func (p *Product) GetAllProducts(w http.ResponseWriter, r *http.Request) []model.Products {
-	w.Header().Set("Content-Type", "application/json")
-	rows, err := p.db.Query("SELECT * FROM products")
+func (p *Product) GetAllProducts(w http.ResponseWriter, r *http.Request) {
+	productRepo := repository.ProductRepository{Db: p.db}
+	productService := services.ProductService{Repo: productRepo, Db: p.db}
+	products, err := productService.GetAllProducts()
 	if err != nil {
-		log.Printf("error fetching products from database. Err: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return nil
+		return
 	}
-	defer rows.Close()
-
-	var products []model.Products
-	for rows.Next() {
-		var product model.Products
-		err := rows.Scan(&product.ProductID, &product.Name, &product.Price)
-		if err != nil {
-			log.Printf("error scanning row. Err: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return nil
-		}
-		products = append(products, product)
-	}
-
-	jsonResp, err := json.Marshal(products)
-	if err != nil {
-		log.Fatalf("error handling JSON marshal. Err: %v", err)
-	}
-
-	_, _ = w.Write(jsonResp)
-	return products
+	json.NewEncoder(w).Encode(products)
 }

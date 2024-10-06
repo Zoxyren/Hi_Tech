@@ -13,7 +13,7 @@ type Product struct {
 	db       *sql.DB
 }
 
-func (p *Product) GetALlProducts(w http.ResponseWriter, r *http.Request) []model.Products {
+func (p *Product) GetAllProducts(w http.ResponseWriter, r *http.Request) []model.Products {
 	w.Header().Set("Content-Type", "application/json")
 	rows, err := p.db.Query("SELECT * FROM products")
 	if err != nil {

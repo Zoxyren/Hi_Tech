@@ -7,6 +7,7 @@ import (
 	"Hi_Tech/internal/services"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
@@ -35,15 +36,15 @@ func (p *Product) GetProductById(w http.ResponseWriter, r *http.Request) error {
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["id"])
 	if err != nil {
-		return errorHandling.ErrInvalidCredentials
+		return errorHandling.ErrItemWithIDNotFound
 	}
 
 	productRepo := repository.ProductRepository{Db: p.db}
 	productService := services.ProductService{Repo: productRepo, Db: p.db}
 	product, err := productService.GetProductById(id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			http.Error(w, "Product not found", http.StatusNotFound)
+		if errors.Is(err, sql.ErrNoRows) {
+			return errorHandling.ErrItemsNotFound
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -57,7 +58,9 @@ func (p *Product) AddProduct(w http.ResponseWriter, r *http.Request) error {
 	var product model.Products
 	err := json.NewDecoder(r.Body).Decode(&product)
 	if err != nil {
-		return errorHandling.ErrInvalidCredentials
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return errorHandling.ErrorAddingProduct
+
 	}
 
 	productRepo := repository.ProductRepository{Db: p.db}

@@ -1,4 +1,4 @@
-# Project Hi_Tech
+# Project Hi_Tech_Backend
 
 One Paragraph of project description goes here
 

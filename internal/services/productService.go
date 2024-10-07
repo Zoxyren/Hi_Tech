@@ -18,3 +18,7 @@ func (s *ProductService) GetAllProducts() ([]model.Products, error) {
 func (s *ProductService) GetProductById(id int) (*model.Products, error) {
 	return s.Repo.FetchProductById(id)
 }
+
+func (s *ProductService) AddProduct(product *model.Products) error {
+	return s.Repo.InsertItem(product)
+}

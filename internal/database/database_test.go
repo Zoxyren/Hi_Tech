@@ -67,14 +67,14 @@ func TestMain(m *testing.M) {
 }
 
 func TestNew(t *testing.T) {
-	srv := New()
+	srv := DBConnection()
 	if srv == nil {
-		t.Fatal("New() returned nil")
+		t.Fatal("DBConnection() returned nil")
 	}
 }
 
 func TestHealth(t *testing.T) {
-	srv := New()
+	srv := DBConnection()
 
 	stats := srv.Health()
 
@@ -92,7 +92,7 @@ func TestHealth(t *testing.T) {
 }
 
 func TestClose(t *testing.T) {
-	srv := New()
+	srv := DBConnection()
 
 	if srv.Close() != nil {
 		t.Fatalf("expected Close() to return nil")

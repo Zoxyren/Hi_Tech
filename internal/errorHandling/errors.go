@@ -24,4 +24,6 @@ var (
 	ErrInvalidCredentials   = NewError(http.StatusUnauthorized, "invalid credentials")
 	ErrInternalServer       = NewError(http.StatusInternalServerError, "internal server error")
 	ErrProductAlreadyExists = NewError(http.StatusConflict, "product already exists")
+	ErrInsertingStatement   = NewError(http.StatusInternalServerError, "error inserting statement")
+	ErrorAddingProduct      = NewError(http.StatusInternalServerError, "error adding product")
 )

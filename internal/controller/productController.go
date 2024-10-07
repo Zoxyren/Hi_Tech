@@ -52,3 +52,20 @@ func (p *Product) GetProductById(w http.ResponseWriter, r *http.Request) error {
 	json.NewEncoder(w).Encode(product)
 	return nil
 }
+
+func (p *Product) AddProduct(w http.ResponseWriter, r *http.Request) error {
+	var product model.Products
+	err := json.NewDecoder(r.Body).Decode(&product)
+	if err != nil {
+		return errorHandling.ErrInvalidCredentials
+	}
+
+	productRepo := repository.ProductRepository{Db: p.db}
+	productService := services.ProductService{Repo: productRepo, Db: p.db}
+	err = productService.AddProduct(&product)
+	if err != nil {
+		return err
+	}
+	json.NewEncoder(w).Encode(product)
+	return nil
+}

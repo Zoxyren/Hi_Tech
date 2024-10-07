@@ -44,7 +44,7 @@ func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	s := &Server{
 		port: port,
-		db:   database.New(),
+		db:   database.DBConnection(),
 	}
 
 	// Declare Server config

@@ -39,7 +39,7 @@ var (
 	dbInstance *service
 )
 
-func New() Service {
+func DBConnection() Service {
 	conn, err := pgx.Connect(context.Background(), os.Getenv("CONN"))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
@@ -56,7 +56,6 @@ func (s *service) Health() map[string]string {
 	defer cancel()
 
 	stats := make(map[string]string)
-
 	// Ping the database
 	err := s.db.PingContext(ctx)
 	if err != nil {

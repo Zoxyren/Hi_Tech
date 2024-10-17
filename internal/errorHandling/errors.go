@@ -26,4 +26,6 @@ var (
 	ErrProductAlreadyExists = NewError(http.StatusConflict, "product already exists")
 	ErrInsertingStatement   = NewError(http.StatusInternalServerError, "error inserting statement")
 	ErrorAddingProduct      = NewError(http.StatusInternalServerError, "error adding product")
+	ErrCreatingUser         = NewError(http.StatusInternalServerError, "error creating user account")
+	ErrCreatingCard         = NewError(http.StatusInternalServerError, "Failed to create card")
 )

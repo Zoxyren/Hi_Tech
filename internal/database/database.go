@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/jackc/pgx/v5"
 	"log"
+	"log/slog"
 	"os"
 	"strconv"
 	"time"
@@ -40,12 +40,11 @@ var (
 )
 
 func DBConnection() Service {
-	conn, err := pgx.Connect(context.Background(), os.Getenv("CONN"))
+	conn := os.Getenv("CONN")
+	err, _ := sql.Open("postgres", conn)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
+		slog.Error("Failed to connect to the database: %v", err)
 	}
-	defer conn.Close(context.Background())
 	return dbInstance
 }
 

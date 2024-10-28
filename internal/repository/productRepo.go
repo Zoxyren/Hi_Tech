@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"Hi_Tech/internal/model"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -26,9 +27,9 @@ func (r *ProductRepository) GetAll() ([]Product, error) {
 	return products, nil
 }
 
-func (r *ProductRepository) Add(product Product) error {
+func (r *ProductRepository) Add(product model.Product) error {
 	query := `INSERT INTO products (name, image_url, description, price, stock_quantity) VALUES ($1, $2, $3, $4, $5)`
-	_, err := r.db.Exec(query, product.Name, product.ImageURL, product.Description, product.Price, product.StockQuantity)
+	_, err := r.db.Exec(query, product.Name, product.Image, product.Description, product.Price, product.Stock)
 	return err
 }
 

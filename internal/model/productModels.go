@@ -12,7 +12,7 @@ type Cart struct {
 	UserID uuid.UUID
 }
 
-type Products struct {
+type Product struct {
 	ProductID   int    `json:"product_id"`
 	Name        string `json:"name"`
 	Image       image  `json:"image"`

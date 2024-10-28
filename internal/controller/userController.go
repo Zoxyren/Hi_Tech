@@ -9,9 +9,8 @@ import (
 )
 
 type User struct {
-	user model.User
+	user *model.User
 	db   *sql.DB
-	model.User
 }
 
 func (u *User) RegisterUser(w http.ResponseWriter, r *http.Request) (error, error) {
@@ -22,14 +21,14 @@ func (u *User) RegisterUser(w http.ResponseWriter, r *http.Request) (error, erro
 		return err, nil
 	}
 
-	// Assuming there is a method called Register in the model.User struct
 	userRepository := repository.UserRepository{}
-	newUser, err := userRepository.Register(user) // Fixed: removed unnecessary type conversion
+	newUser, err := userRepository.Register(user)
 	if err != nil {
+		// Log the error for debugging
+		http.Error(w, "Failed to register user", http.StatusInternalServerError)
 		return err, nil
 	}
 
-	user = newUser
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(newUser)
 	return nil, nil
 }

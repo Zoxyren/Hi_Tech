@@ -8,7 +8,7 @@ import (
 )
 
 type User struct {
-	model.User
+	*model.User
 }
 
 type Credentials struct {
@@ -34,7 +34,7 @@ func (ur *UserRepository) Login(credentials Credentials) bool {
 	return true
 }
 
-func (ur *UserRepository) Register(user User) (int, error) {
+func (ur *UserRepository) Register(user model.User) (int, error) {
 	err := ur.db.QueryRow("INSERT INTO users(username, email, password) VALUES ($1, $2, $3) RETURNING user_id;", user.Username, user.Email, user.Password).Scan(&user.UserID)
 	if err != nil {
 		log.Fatal(err)

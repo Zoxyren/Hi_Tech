@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"Hi_Tech/internal/model"
 	"Hi_Tech/internal/repository"
 	"database/sql"
 	"encoding/json"
@@ -13,9 +14,7 @@ import (
 )
 
 type Product struct {
-	ID    int
-	Name  string
-	Price float64
+	model.Product
 }
 
 type ProductController struct {
@@ -35,7 +34,7 @@ func (pc *ProductController) GetAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pc *ProductController) Add(w http.ResponseWriter, r *http.Request) {
-	var product Product
+	var product model.Product
 	err := json.NewDecoder(r.Body).Decode(&product)
 	if err != nil {
 		http.Error(w, "Invalid product", http.StatusBadRequest)

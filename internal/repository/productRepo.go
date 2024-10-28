@@ -1,59 +1,39 @@
 package repository
 
 import (
-	"Hi_Tech/internal/errorHandling"
-	"Hi_Tech/internal/model"
-	"database/sql"
-	"errors"
-	"log/slog"
+	"github.com/jmoiron/sqlx"
 )
 
-type ProductRepository struct {
-	Db *sql.DB
+type Product struct {
+	ID            int     `db:"product_id"`
+	Name          string  `db:"name"`
+	ImageURL      string  `db:"image_url"`
+	Description   string  `db:"description"`
+	Price         float64 `db:"price"`
+	StockQuantity int     `db:"stock_quantity"`
 }
 
-func (r *ProductRepository) FetchAll() ([]model.Products, error) {
-	rows, err := r.Db.Query("SELECT * FROM products")
+type ProductRepository struct {
+	db *sqlx.DB
+}
+
+func (r *ProductRepository) GetAll() ([]Product, error) {
+	var products []Product
+	err := r.db.Select(&products, "SELECT product_id, name, image_url, description, price, stock_quantity FROM products")
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
-	var products []model.Products
-	for rows.Next() {
-		var product model.Products
-		err := rows.Scan(&product.ProductID, &product.Name, &product.Price)
-		if err != nil {
-			return nil, err
-		}
-		products = append(products, product)
-	}
-
 	return products, nil
 }
 
-func (r *ProductRepository) FetchProductById(id int) (*model.Products, error) {
-	var product model.Products
-	row := r.Db.QueryRow("SELECT id, name, price FROM products WHERE id = ?", id)
-	err := row.Scan(&product.ProductID, &product.Name, &product.Price)
-	if errors.Is(err, sql.ErrNoRows) {
-		return nil, err
-	}
-	return &product, err
+func (r *ProductRepository) Add(product Product) error {
+	query := `INSERT INTO products (name, image_url, description, price, stock_quantity) VALUES ($1, $2, $3, $4, $5)`
+	_, err := r.db.Exec(query, product.Name, product.ImageURL, product.Description, product.Price, product.StockQuantity)
+	return err
 }
 
-func (r *ProductRepository) InsertItem(product *model.Products) error {
-	stmt, err := r.Db.Prepare("INSERT INTO products(name, price, image, description, stock) VALUES($1, $2, $3, $4, $5)")
-	if err != nil {
-		return errorHandling.ErrorAddingProduct
-	}
-	defer func(stmt *sql.Stmt) {
-		err := stmt.Close()
-		if err != nil {
-			slog.Error("Failed to insert Item", "error", errorHandling.ErrInsertingStatement)
-		}
-	}(stmt)
-
-	_, err = stmt.Exec(product.Name, product.Price, product.Image, product.Description, product.Stock)
+func (r *ProductRepository) Remove(id int) error {
+	query := `DELETE FROM cart_items WHERE product_id = $1; DELETE FROM products WHERE product_id = $1`
+	_, err := r.db.Exec(query, id)
 	return err
 }

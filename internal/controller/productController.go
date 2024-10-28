@@ -1,74 +1,76 @@
 package controller
 
 import (
-	"Hi_Tech/internal/errorHandling"
-	"Hi_Tech/internal/model"
 	"Hi_Tech/internal/repository"
-	"Hi_Tech/internal/services"
 	"database/sql"
 	"encoding/json"
-	"errors"
-	"github.com/gorilla/mux"
+	"fmt"
+	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 type Product struct {
-	products *[]model.Products
-	db       *sql.DB
-}
-type ErrorResponse struct {
-	error *errorHandling.ErrorResponse
+	ID    int
+	Name  string
+	Price float64
 }
 
-func (p *Product) GetAllProducts(w http.ResponseWriter, r *http.Request) error {
-	productRepo := repository.ProductRepository{Db: p.db}
-	productService := services.ProductService{Repo: productRepo, Db: p.db}
-	products, err := productService.GetAllProducts()
-	if err != nil {
-		return errorHandling.ErrInternalServer
-	}
+type ProductController struct {
+	productRepository *repository.ProductRepository
+}
+
+func NewProductController(productRepository *repository.ProductRepository) *ProductController {
+	return &ProductController{productRepository: productRepository}
+}
+
+func (pc *ProductController) GetAll(w http.ResponseWriter, r *http.Request) {
+	log.Println("Getting all products")
+	products, _ := pc.productRepository.GetAll()
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(products)
-	return nil
 }
 
-func (p *Product) GetProductById(w http.ResponseWriter, r *http.Request) error {
-	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["id"])
-	if err != nil {
-		return errorHandling.ErrItemWithIDNotFound
-	}
-
-	productRepo := repository.ProductRepository{Db: p.db}
-	productService := services.ProductService{Repo: productRepo, Db: p.db}
-	product, err := productService.GetProductById(id)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return errorHandling.ErrItemsNotFound
-		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-		return nil
-	}
-	json.NewEncoder(w).Encode(product)
-	return nil
-}
-
-func (p *Product) AddProduct(w http.ResponseWriter, r *http.Request) error {
-	var product model.Products
+func (pc *ProductController) Add(w http.ResponseWriter, r *http.Request) {
+	var product Product
 	err := json.NewDecoder(r.Body).Decode(&product)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return errorHandling.ErrorAddingProduct
-
+		http.Error(w, "Invalid product", http.StatusBadRequest)
+		return
 	}
 
-	productRepo := repository.ProductRepository{Db: p.db}
-	productService := services.ProductService{Repo: productRepo, Db: p.db}
-	err = productService.AddProduct(&product)
+	pc.productRepository.Add(product)
+	log.Printf("Inserted product: %s", product.Name)
+
+	w.WriteHeader(http.StatusCreated)
+	fmt.Fprint(w, "Product inserted successfully")
+}
+
+func (pc *ProductController) Remove(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	productID, err := strconv.Atoi(id)
 	if err != nil {
-		return err
+		http.Error(w, "Invalid product ID", http.StatusBadRequest)
+		return
 	}
-	json.NewEncoder(w).Encode(product)
-	return nil
+
+	pc.productRepository.Remove(productID)
+	log.Printf("Removed product with id: %d", productID)
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, "Product removed successfully")
+}
+
+func main() {
+	db, err := sql.Open("postgres", "user=your_user password=your_password dbname=your_db sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
 }

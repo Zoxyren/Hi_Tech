@@ -1,36 +1,35 @@
 package controller
 
 import (
-	"Hi_Tech/internal/errorHandling"
 	"Hi_Tech/internal/model"
 	"Hi_Tech/internal/repository"
-	"Hi_Tech/internal/services"
-	_ "Hi_Tech/internal/services"
 	"database/sql"
 	"encoding/json"
 	"net/http"
 )
 
 type User struct {
-	user *model.User
+	user model.User
 	db   *sql.DB
+	model.User
 }
 
-func (u *User) RegisterUser(w http.ResponseWriter, r *http.Request) error {
-	// Validate request body
-	var user *model.User
-	productService := services.UserService{Repo: repository.UserRepository{}, Db: u.db}
+func (u *User) RegisterUser(w http.ResponseWriter, r *http.Request) (error, error) {
+	var user model.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		return errorHandling.ErrCreatingUser
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return err, nil
 	}
-	insert, err := productService.CreateUser(user)
+
+	// Assuming there is a method called Register in the model.User struct
+	userRepository := repository.UserRepository{}
+	newUser, err := userRepository.Register(user) // Fixed: removed unnecessary type conversion
 	if err != nil {
-		return err
+		return err, nil
 	}
-	err = json.NewEncoder(w).Encode(insert)
-	if err != nil {
-		return err
-	}
-	return nil
+
+	user = newUser
+	json.NewEncoder(w).Encode(user)
+	return nil, nil
 }
